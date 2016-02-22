@@ -1,0 +1,170 @@
+
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <title>React Carousel</title>
+    <script src="js/react.js"></script>
+    <script src="js/react-dom.js"></script>
+
+    <script src="js/JSXTransformer.js"></script>
+    <link type="text/css" rel="stylesheet" href="css/bootstrap.min.css"/>
+    <link type="text/css" rel="stylesheet" href="css/style.css"/>
+
+  </head>
+  <body>
+  	<div class="wrapper">
+    
+    </div>
+
+    <script type="text/jsx">
+
+    var cjson = {
+		    items: [{
+		        id: 'anniversay',
+		        title: '1Our 250 Anniversay',
+		        description: '250 years of supporting customers, businesses and communities of Britain',
+		        img: 'images/250-anniversary.png',
+		        bgcolor:'#0d5595',
+		        url: 'https://www.lloydsbank.com/banking-with-us/250-anniversary.asp?wt.ac=common/promotion/sev/hpt/s/rl/250yers/01'
+		    }, {
+		        id: 'mobile',
+		        title: '2Mobile Banking',
+		        description: 'Manage your money on the move',
+		        img: './images/mob-banking.png',
+		        bgcolor:'#2178b0',
+		        url: 'https://www.lloydsbank.com/online-banking/mobile-banking.asp?WT.ac=HPLMP3'
+		    }, {
+		        id: 'offers',
+		        title: '3Everyday Offers',
+		        description: 'Get cashback using Everyday Offers at the type of places you regularly shop',
+		        img: 'images/offers.png',
+		        bgcolor:'#649c00',
+		        url: 'https://www.lloydsbank.com/online-banking/benefits-online-banking/everyday-offers.asp?WT.ac=HPLMP1',
+		    },{
+		        id: 'offers',
+		        title: '4Everyday Offers',
+		        description: 'Get cashback using Everyday Offers at the type of places you regularly shop',
+		        img: 'images/offers.png',
+		        bgcolor:'#f49c00',
+		        url: 'https://www.lloydsbank.com/online-banking/benefits-online-banking/everyday-offers.asp?WT.ac=HPLMP1',
+		    }]
+		};
+
+
+		// Carousel Slide 
+      	var CarouselSlide = React.createClass({
+      		render: function(){
+      			return (<li className={"c-item " + this.props.json.id} key={this.props.json.id} >
+      				<div className="row">
+					  <div className="col-xs-12 col-sm-6 col-md-4">
+					    <div className="thumbnail" style={{background:this.props.json.bgcolor}}>
+					      <img src={this.props.json.img} alt={this.props.json.title}></img>
+					      <div className="caption">
+					        <h3>{this.props.json.title}</h3>
+					        <p>{this.props.json.description}</p>
+					        <p>
+					        	<a href={this.props.json.url} className="btn btn-primary" role="button">See Details</a> 
+					        </p>
+					      </div>
+					    </div>
+					  </div>
+					</div>
+      			 </li>)
+      		}
+      	});
+
+      	var that = {};
+      	// Carousel List Component
+      	var CarouselList = React.createClass({
+      		render: function () {
+      			that = this;
+	      		var cItemList = cjson.items.map(function(item){
+	      			return ( 
+	      					<CarouselSlide json={item} > </CarouselSlide>
+	      					)
+	      		});
+	      		return  (
+					<div  className="c-container" onMouseOut={this.autoMove} onMouseOver={this.stopAutoMove}>
+						<div className="carousel">
+	      					<ul className="clist"> 
+	      						{cItemList} 
+	      					</ul>
+	      				</div>
+				    	<a className="prev" onClick={this.prev} href="#">&lt;</a>
+						<a className="next" onClick={this.next} href="#">&gt;</a>
+				    </div>
+	      		)
+      		},
+      		componentDidMount: function(){
+      			this.createCarousel();
+      		},
+      		getInitialState:function(){
+      			return {
+	      			currentSlide : 1,
+	      			totalSlides: cjson.items.length
+      			}
+      		},
+      		moveCarousel : function(pixels){
+      			this.carouselStrip.style.left = pixels + 'px';
+      		},
+      		next: function(e){
+      			if(typeof e != 'undefined'){
+      				this.stopAutoMove();
+      			}
+      			if(this.state.currentSlide < this.state.totalSlides){
+      				this.moveCarousel(this.state.currentSlide * this.slideWidth * (-1) );
+      				this.state.currentSlide  += 1;
+      			} else{
+					this.carouselStrip.style.left =   '0px';
+					this.state.currentSlide =1;
+      			}
+      		},
+      		prev: function(){
+      			this.stopAutoMove();
+      			if(this.state.currentSlide === this.state.totalSlides ){
+      				this.moveCarousel((this.state.currentSlide-2) * this.slideWidth * (-1));
+      				this.state.currentSlide -= 1;
+      			}
+      			else if(this.state.currentSlide > 1){
+      				this.moveCarousel((this.state.currentSlide -2 ) * this.slideWidth * (-1));
+       				this.state.currentSlide  -= 1;
+
+      			}
+      			else{
+					this.moveCarousel((this.state.totalSlides-1) * this.slideWidth * (-1));
+					this.state.currentSlide = this.state.totalSlides;
+      			}
+      		},
+      		createCarousel : function() {
+				console.log('now creating carousel');
+				var totalSlides = cjson.items.length;
+				var oneItem = document.querySelectorAll('.c-item')[0];
+				this.carouselContainer = document.querySelectorAll('.c-container')[0];
+				this.slideWidth = oneItem.offsetWidth;
+				this.carouselContainer.style.width = this.slideWidth+"px";
+				this.carouselStrip = document.querySelectorAll('.c-container .carousel ul')[0];
+				this.autoMove();
+			},
+			stopAutoMove: function(){
+				if(this.carouselInterval){
+					clearInterval(this.carouselInterval);
+				}
+			},
+			autoMove: function(){
+				this.stopAutoMove();
+				this.carouselInterval = setInterval(
+					function(){
+						that.next();
+					}, 
+				2000 );
+			}
+      	});
+
+      React.render( <CarouselList/>,    document.querySelectorAll('.wrapper')[0]    );
+
+    </script>
+
+
+  </body>
+</html>
